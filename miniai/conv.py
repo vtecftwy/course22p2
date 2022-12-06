@@ -16,17 +16,20 @@ from typing import Mapping
 from .training import *
 from .datasets import *
 
-# %% ../nbs/07_convolutions.ipynb 68
+# %% ../nbs/07_convolutions.ipynb 74
 def conv(ni, nf, ks=3, stride=2, act=True):
     res = nn.Conv2d(ni, nf, stride=stride, kernel_size=ks, padding=ks//2)
     if act: res = nn.Sequential(res, nn.ReLU())
     return res
 
-# %% ../nbs/07_convolutions.ipynb 73
+# %% ../nbs/07_convolutions.ipynb 80
+# mps for macos, cuda for linux, cpu for all if no GPU
 def_device = 'mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def to_device(x, device=def_device):
-    if isinstance(x, Mapping): return {k:v.to(device) for k,v in x.items()}
+    if isinstance(x, Mapping): 
+        return {k:v.to(device) for k,v in x.items()}
     return type(x)(o.to(device) for o in x)
 
-def collate_device(b): return to_device(default_collate(b))
+def collate_device(b): 
+    return to_device(default_collate(b))
