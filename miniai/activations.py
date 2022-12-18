@@ -20,8 +20,8 @@ from .learner import *
 __all__ = ['set_seed', 'Hook', 'Hooks', 'HooksCallback', 'append_stats', 'get_hist', 'get_min', 'ActivationStats']
 
 # %% ../nbs/10_activations.ipynb 4
-def set_seed(seed):
-    torch.use_deterministic_algorithms(True)
+def set_seed(seed, deterministic=False):
+    torch.use_deterministic_algorithms(deterministic)
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -52,14 +52,14 @@ class HooksCallback(Callback):
         fc.store_attr()
         super().__init__()
     
-    def before_fit(self):
-        mods = fc.filter_ex(self.learn.model.modules(), self.mod_filter)
-        self.hooks = Hooks(mods, self._hookfunc)
+    def before_fit(self, learn):
+        mods = fc.filter_ex(learn.model.modules(), self.mod_filter)
+        self.hooks = Hooks(mods, partial(self._hookfunc, learn))
 
-    def _hookfunc(self, *args, **kwargs):
-        if self.learn.model.training: self.hookfunc(*args, **kwargs)
+    def _hookfunc(self, learn, *args, **kwargs):
+        if learn.training: self.hookfunc(*args, **kwargs)
 
-    def after_fit(self): self.hooks.remove()
+    def after_fit(self, learn): self.hooks.remove()
     def __iter__(self): return iter(self.hooks)
     def __len__(self): return len(self.hooks)
 
