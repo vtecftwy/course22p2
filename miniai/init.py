@@ -26,7 +26,7 @@ from .conv import *
 from .learner import *
 from .activations import *
 
-# %% ../nbs/11_initializing.ipynb 8
+# %% ../nbs/11_initializing.ipynb 11
 def clean_ipython_hist():
     # Code in this function mainly copied from IPython source
     if not 'get_ipython' in globals(): return
@@ -41,7 +41,7 @@ def clean_ipython_hist():
     hm.input_hist_raw[:] = [''] * pc
     hm._i = hm._ii = hm._iii = hm._i00 =  ''
 
-# %% ../nbs/11_initializing.ipynb 9
+# %% ../nbs/11_initializing.ipynb 12
 def clean_tb():
     # h/t Piotr Czapla
     if hasattr(sys, 'last_traceback'):
@@ -50,14 +50,14 @@ def clean_tb():
     if hasattr(sys, 'last_type'): delattr(sys, 'last_type')
     if hasattr(sys, 'last_value'): delattr(sys, 'last_value')
 
-# %% ../nbs/11_initializing.ipynb 10
+# %% ../nbs/11_initializing.ipynb 13
 def clean_mem():
     clean_tb()
     clean_ipython_hist()
     gc.collect()
     torch.cuda.empty_cache()
 
-# %% ../nbs/11_initializing.ipynb 90
+# %% ../nbs/11_initializing.ipynb 93
 class GeneralRelu(nn.Module):
     def __init__(self, leak=None, sub=None, maxv=None):
         super().__init__()
@@ -69,7 +69,7 @@ class GeneralRelu(nn.Module):
         if self.maxv is not None: x.clamp_max_(self.maxv)
         return x
 
-# %% ../nbs/11_initializing.ipynb 91
+# %% ../nbs/11_initializing.ipynb 94
 def plot_func(f, start=-5., end=5., steps=100):
     x = torch.linspace(start, end, steps)
     plt.plot(x, f(x))
@@ -77,18 +77,18 @@ def plot_func(f, start=-5., end=5., steps=100):
     plt.axhline(y=0, color='k', linewidth=0.7)
     plt.axvline(x=0, color='k', linewidth=0.7)
 
-# %% ../nbs/11_initializing.ipynb 95
+# %% ../nbs/11_initializing.ipynb 98
 def init_weights(m, leaky=0.):
     if isinstance(m, (nn.Conv1d,nn.Conv2d,nn.Conv3d,nn.Linear)): init.kaiming_normal_(m.weight, a=leaky)
 
-# %% ../nbs/11_initializing.ipynb 115
+# %% ../nbs/11_initializing.ipynb 118
 def conv(ni, nf, ks=3, stride=2, act=nn.ReLU, norm=None):
     layers = [nn.Conv2d(ni, nf, stride=stride, kernel_size=ks, padding=ks//2, bias=norm is None)]
     if norm: layers.append(norm(nf))
     if act: layers.append(act())
     return nn.Sequential(*layers)
 
-# %% ../nbs/11_initializing.ipynb 116
+# %% ../nbs/11_initializing.ipynb 119
 def get_model(act=nn.ReLU, nfs=None, norm=None):
     if nfs is None: nfs = [1,8,16,32,64]
     layers = [conv(nfs[i], nfs[i+1], act=act, norm=norm) for i in range(len(nfs)-1)]
