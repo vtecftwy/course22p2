@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['MixedPrecision', 'AccelerateCB']
 
-# %% ../nbs/17_DDPM_v2.ipynb 3
+# %% ../nbs/17_DDPM_v2.ipynb 4
 import pickle,gzip,math,os,time,shutil,torch,random,logging
 import fastcore.all as fc,matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 from collections.abc import Mapping
@@ -26,7 +26,7 @@ from .sgd import *
 from .resnet import *
 from .augment import *
 
-# %% ../nbs/17_DDPM_v2.ipynb 41
+# %% ../nbs/17_DDPM_v2.ipynb 51
 class MixedPrecision(TrainCB):
     order = DeviceCB.order+10
     
@@ -36,18 +36,20 @@ class MixedPrecision(TrainCB):
         self.autocast = torch.autocast("cuda", dtype=torch.float16)
         self.autocast.__enter__()
 
-    def after_loss(self, learn): self.autocast.__exit__(None, None, None)
+    def after_loss(self, learn): 
+        self.autocast.__exit__(None, None, None)
         
-    def backward(self, learn): self.scaler.scale(learn.loss).backward()
+    def backward(self, learn): 
+        self.scaler.scale(learn.loss).backward()
 
     def step(self, learn):
         self.scaler.step(learn.opt)
         self.scaler.update()
 
-# %% ../nbs/17_DDPM_v2.ipynb 49
+# %% ../nbs/17_DDPM_v2.ipynb 59
 from accelerate import Accelerator
 
-# %% ../nbs/17_DDPM_v2.ipynb 50
+# %% ../nbs/17_DDPM_v2.ipynb 60
 class AccelerateCB(TrainCB):
     order = DeviceCB.order+10
     def __init__(self, n_inp=1, mixed_precision="fp16"):
